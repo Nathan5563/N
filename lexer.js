@@ -14,11 +14,17 @@ class Token {
 
 class Interpreter {
     constructor(text, tokens) {
-        this.text = text.replace(/\s+/g, ''); // Remove all whitespace with a regex
+        this.text = text;
         this.tokens = tokens;
         this.pos = 0;
         this.currentChar = this.text[this.pos]; // Default to the first character
         this.currentToken = null;
+    }
+
+    skipWhitespace() {
+        while (this.currentChar != null && this.currentChar === ' ') {
+            this.advance();
+        }
     }
 
     // Increment the position pointer and modify the current character accordingly
@@ -55,7 +61,13 @@ class Interpreter {
         // values in the constructor
         const { tokens } = this;
 
-        if (this.currentChar != null) {
+        while (this.currentChar != null) {
+            // If the current character is whitespace, skip it
+            if (this.currentChar === ' ') {
+                this.skipWhitespace();
+                continue;
+            }
+
             // If the current character is an integer, return an 'INTEGER' token
             if (this.currentChar.match(/[0-9]/)) {
                 return new Token('INTEGER', this.integer());
@@ -69,9 +81,9 @@ class Interpreter {
                 return operator;
             }
 
-        } else {
-            return new Token('EOF', null);
-        }
+        } 
+        
+        return new Token('EOF', null);
     }
 
     // "Eat" the current token and go on to the next
