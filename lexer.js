@@ -17,39 +17,37 @@ class Interpreter {
         this.text = text.replace(/\s+/g, ''); // Remove all whitespace with a regex
         this.tokens = tokens;
         this.pos = 0;
-        this.currentChar = null;
+        this.currentChar = this.text[this.pos]; // Default to the first character
         this.currentToken = null;
     }
 
+    // Increment the position pointer and modify the current character accordingly
     advance() {
         const { text } = this;
 
+        this.pos += 1;
         // If the index has reached the end of the line, set the current character to null
-        if (text.length <= this.pos) {
+        if (this.pos > text.length-1) {
             this.currentChar = null;
 
         } else {
-            // Otherwise, define the current character and increment the position
+        // Otherwise, define the current character
             this.currentChar = text[this.pos]
-            this.pos += 1;
         }
     }
 
+    // Concatenate digits of an integer until it finds a non-integer
     integer() {
         let result = '';
-        while (this.currentChar != null) {
-            if (!isNaN(this.currentChar)) {
-                result += this.currentChar;
-                this.advance();
-            }
-            if (isNaN(this.currentChar)) {
-                console.log(+result);
-                return +result;
-            }
-            console.log(result);
+
+        // If the current character is not null and is a digit, concatenate it to the 
+        // result and advance the pointer
+        while (this.currentChar != null && this.currentChar.match(/[0-9]/)) {
+            result += this.currentChar;
+            this.advance();
         }
-        console.log(result);
-        
+        // Convert the string to a number and return it
+        return +result;
     }
 
     getNextToken() {
@@ -57,28 +55,23 @@ class Interpreter {
         // values in the constructor
         const { tokens } = this;
 
-        this.advance();
         if (this.currentChar != null) {
-
             // If the current character is an integer, return an 'INTEGER' token
-            if (+this.currentChar === +this.currentChar) {
+            if (this.currentChar.match(/[0-9]/)) {
                 return new Token('INTEGER', this.integer());
+            }
 
-            } else if (this.currentChar in tokens) {
-                // If the current character is a predefined token in tokens.js, return the 
-                // token type and value accordingly
-                return new Token(tokens[this.currentChar], this.currentChar);
-
-            } else {
-                // Log an error if the current character is not one of the above
-                console.log("Unrecognized character");
-                return null;
+            // If the current character is a predefined token in tokens.js, return the
+            // token type and value accordingly
+            if (this.currentChar in tokens) {
+                const operator = new Token(tokens[this.currentChar], this.currentChar);
+                this.advance();
+                return operator;
             }
 
         } else {
             return new Token('EOF', null);
         }
-        
     }
 
     // "Eat" the current token and go on to the next
@@ -96,15 +89,15 @@ class Interpreter {
 
         this.currentToken = this.getNextToken();
 
-        // Set the first value to the current token
+        // Set the first token to the current token
         const left = this.currentToken;
         this.eat('INTEGER');
 
-        // Set the second value to the current token
+        // Set the second token to the current token
         const operator = this.currentToken;
         this.eat(tokens[operator.value]);
 
-        // Set the third value to the current token
+        // Set the third token to the current token
         const right = this.currentToken;
         this.eat('INTEGER');
 
@@ -120,14 +113,11 @@ class Interpreter {
             result = left.value/right.value;
         }
 
-        // console.log(left);
-        // console.log(operator);
-        // console.log(right);
         return result;
     }
 
 }
 
-interpreter = new Interpreter('91 + 3', tokens);
+interpreter = new Interpreter('96 / 32', tokens);
 
 console.log(interpreter.expr());
