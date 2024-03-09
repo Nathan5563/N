@@ -118,6 +118,6 @@ class Interpreter {
 
 }
 
-interpreter = new Interpreter('96 / 4', tokens);
+interpreter = new Interpreter('96 / 32', tokens);
 
 console.log(interpreter.expr());
